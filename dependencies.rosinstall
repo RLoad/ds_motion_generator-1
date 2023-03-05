@@ -22,4 +22,7 @@
     uri: https://github.com/epfl-lasa/gaussian-process-regression.git
     version: master
 
-
+- git: 
+    local-name: net-ft-ros
+    uri: https://github.com/RLoad/net-ft-ros.git
+    version: master
