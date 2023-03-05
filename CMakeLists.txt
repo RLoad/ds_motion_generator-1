@@ -107,7 +107,8 @@ set(H_FILES ${INCLUDE_DIR}/analytic_DS/LinearMotionGenerator.h
             ${INCLUDE_DIR}/analytic_DS/SwipeMotionGenerator.h
             ${INCLUDE_DIR}/learned_DS/seDSMotionGenerator.h
             ${INCLUDE_DIR}/learned_DS/lpvDSMotionGenerator.h
-            ${INCLUDE_DIR}/learned_DS/lagsDSMotionGenerator.h)
+            ${INCLUDE_DIR}/learned_DS/lagsDSMotionGenerator.h
+            ${INCLUDE_DIR}/learned_DS/test_mini_code.h)
 
 ## Specify locations of header files
 ## Your package locations should be listed before other locations
@@ -120,6 +121,7 @@ set(SRCS
     src/learned_DS/seDSMotionGenerator.cpp
     src/learned_DS/lpvDSMotionGenerator.cpp
     src/learned_DS/lagsDSMotionGenerator.cpp
+    src/learned_DS/test_mini_code.cpp
     src/analytic_DS/SwipeMotionGenerator.cpp
     src/analytic_DS/CycleMotionGenerator.cpp
     src/analytic_DS/PPOscilateMotionGenerator.cpp
@@ -154,6 +156,9 @@ target_link_libraries(lpvDS_motionGenerator_node ds_motion_generator)
 
 add_executable(lagsDS_motionGenerator_node src/lagsDS_motionGenerator_node.cpp)
 target_link_libraries(lagsDS_motionGenerator_node ds_motion_generator)
+
+add_executable(test_mini_code_node src/test_mini_code_node.cpp)
+target_link_libraries(test_mini_code_node ds_motion_generator)
 
 ### ADD Nodes that use the library
 add_dependencies(seDS_motionGenerator_node 
@@ -192,6 +197,11 @@ add_dependencies(Linear_motionGenerator_node
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_gencfg)
 
+add_dependencies(test_mini_code_node 
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg)
+
 target_link_libraries(swipe_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
 target_link_libraries(cycle_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
 target_link_libraries(PPOscilate_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
@@ -199,3 +209,4 @@ target_link_libraries(Linear_motionGenerator_node ds_motion_generator ${catkin_L
 target_link_libraries(seDS_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
 target_link_libraries(lpvDS_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
 target_link_libraries(lagsDS_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
+target_link_libraries(test_mini_code_node ds_motion_generator ${catkin_LIBRARIES} )
