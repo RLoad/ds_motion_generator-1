@@ -84,6 +84,7 @@ private:
     ros::Publisher            pub_desired_vel_;
     ros::Publisher            pub_desired_vel_filtered_;
     ros::Publisher            pub_desired_damping_eig_;
+    ros::Publisher            pub_desired_position_;
 
     //----- Topic Names
     std::string               input_pose_name_;
@@ -103,6 +104,7 @@ private:
     geometry_msgs::Twist            msg_desired_vel_;
     geometry_msgs::Pose            msg_desired_vel_filtered_;
     std_msgs::Float64MultiArray     msg_desired_damping_eig_;
+    std_msgs::Float64MultiArray     msg_desired_pose_;
   //------------------------------------------------------------
 
   //----   Filter variables
@@ -135,6 +137,8 @@ private:
     MathLib::Vector desired_vel_filtered_;
     std::vector<double> eig;
     float eig_velue[2];
+    std::vector<double> pose_command;
+    float pose_command_velue[7];
   
   //---- limitation for output
     double Velocity_limit_;

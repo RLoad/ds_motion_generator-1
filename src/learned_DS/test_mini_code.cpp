@@ -49,7 +49,7 @@ test_mini_code::test_mini_code(
 			record_1_robotdemo_0_humandemo_(record_1_robotdemo_0_humandemo),
 			target_(target),
 		//---- init some parameter, which can use dycall to online change
-			eig_velue{70.0,60.0},Velocity_limit_(0.1){
+			eig_velue{70.0,60.0},pose_command_velue{0.0, 0.667, 0.0017, -1.2, 0.018, -0.4, 0.008},Velocity_limit_(0.1){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -84,6 +84,12 @@ bool test_mini_code::Init() {
 		msg_desired_damping_eig_.layout.dim[0].label = "length";
 		msg_desired_damping_eig_.layout.dim[0].size = eig.size();
 		msg_desired_damping_eig_.layout.dim[0].stride = 1;
+
+	//------ setup for variable impedance gains
+		msg_desired_pose_.layout.dim.push_back(std_msgs::MultiArrayDimension());
+		msg_desired_pose_.layout.dim[0].label = "length";
+		msg_desired_pose_.layout.dim[0].size = pose_command.size();
+		msg_desired_pose_.layout.dim[0].stride = 1;
 
 	//------ some condition for phase change and coupled
 		_firstRealPoseReceived = false;
@@ -175,6 +181,9 @@ bool test_mini_code::InitializeROS() {
   pub_desired_vel_          	= nh_.advertise<geometry_msgs::Twist>(output_vel_name_, 1);    
 	pub_desired_vel_filtered_ 	= nh_.advertise<geometry_msgs::Pose>(output_filtered_vel_name_, 1);
 	pub_desired_damping_eig_         = nh_.advertise<std_msgs::Float64MultiArray>(output_damping_eig_topic_name_, 1);
+
+	//--- position control
+	pub_desired_position_          	= nh_.advertise<std_msgs::Float64MultiArray>("/iiwa/PositionController/command", 1);    
 	
 	if (nh_.ok()) { // Wait for poses being published
 		ros::spinOnce();
@@ -289,24 +298,39 @@ void test_mini_code::ComputeCommand() {
 
 	//---- init some local parameter 
 		MathLib::Vector Trans_pose ; Trans_pose.Resize(3);
+		MathLib::Vector command_pose_task ; command_pose_task.Resize(3);
+		MathLib::Vector command_pose_cartision ; command_pose_cartision.Resize(7);
 
 
 	//------ command calculate part ------------------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------
 		//---- aware robot state
 			Trans_pose = real_pose_ -target_pose_;
+			//Trans_pose = 0;
 
 		//---- calcuate deisried velocity
 			desired_vel_(0) = (-1.9) * Trans_pose[0];
 			desired_vel_(1) = (-1.9) * Trans_pose[1];
 			desired_vel_(2) = (-1.9) * Trans_pose[2];
 			ROS_WARN_STREAM_THROTTLE(warn_freq, "real_pose_  aa: " << real_pose_(0)<<", "<< real_pose_(1)<<", "<< real_pose_(2));
-		ROS_WARN_STREAM_THROTTLE(warn_freq, "Trans_pose  aa: " << Trans_pose(0)<<", "<< Trans_pose(1)<<", "<< Trans_pose(2));
-		ROS_WARN_STREAM_THROTTLE(warn_freq, "desired_vel_ aaa : " << desired_vel_(0)<<", "<< desired_vel_(1)<<", "<< desired_vel_(2));
+			ROS_WARN_STREAM_THROTTLE(warn_freq, "Trans_pose  aa: " << Trans_pose(0)<<", "<< Trans_pose(1)<<", "<< Trans_pose(2));
+			ROS_WARN_STREAM_THROTTLE(warn_freq, "desired_vel_ aaa : " << desired_vel_(0)<<", "<< desired_vel_(1)<<", "<< desired_vel_(2));
+
+		//---- use IK get joint position 
+			command_pose_task=real_pose_+desired_vel_*dt_;
+			// here code IK which will be a function like: command_pose_cartision=IK(command_pose_task);
+
+
+		//---- calculate pose_command
+			for (size_t i = 0; i < 7; i++)
+			{
+				pose_command_velue[i]=command_pose_cartision(i);
+			}
+			pose_command.insert(pose_command.begin(),pose_command_velue,pose_command_velue+7);
 
 
 		//---- calculate eig
-			eig_velue[0]=60;
-			eig_velue[1]=60;
+			eig_velue[0]=20;
+			eig_velue[1]=20;
 			eig.insert(eig.begin(),eig_velue,eig_velue+2);
 
 	//------ command calculate part end ------------------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------
@@ -342,6 +366,9 @@ void test_mini_code::ComputeCommand() {
 			
 		//---------- set imp eig
 			msg_desired_damping_eig_.data.insert(msg_desired_damping_eig_.data.end(), eig.begin(), eig.end());
+		
+		//---------- set position
+			msg_desired_pose_.data.insert(msg_desired_pose_.data.end(), pose_command.begin(), pose_command.end());
 
 
 	//----- print new information
@@ -380,6 +407,8 @@ void test_mini_code::PublishCommand() {
 	pub_desired_vel_filtered_.publish(msg_desired_vel_filtered_);
 	pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
 	eig.clear();
+	pub_desired_position_.publish(msg_desired_pose_);
+	pose_command.clear();
 }
 
 
