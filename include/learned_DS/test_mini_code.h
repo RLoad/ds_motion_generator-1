@@ -71,6 +71,8 @@ private:
 
   double dt_;
 
+  int safe_time_count;
+
   //-----ROS--------------------------------------------------
     //----- ROS system variables
     ros::NodeHandle           nh_;

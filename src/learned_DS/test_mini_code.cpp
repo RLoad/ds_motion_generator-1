@@ -45,6 +45,7 @@ test_mini_code::test_mini_code(
 			output_filtered_vel_name_(output_filtered_vel_name),
 			output_damping_eig_topic_name_(output_damping_eig_topic_name),
 			dt_(1 / frequency),
+			safe_time_count(1),
 			brecord_or_not_(brecord_or_not),
 			record_1_robotdemo_0_humandemo_(record_1_robotdemo_0_humandemo),
 			target_(target),
@@ -299,7 +300,7 @@ void test_mini_code::ComputeCommand() {
 	//---- init some local parameter 
 		MathLib::Vector Trans_pose ; Trans_pose.Resize(3);
 		MathLib::Vector command_pose_task ; command_pose_task.Resize(3);
-		MathLib::Vector command_pose_cartision ; command_pose_cartision.Resize(7);
+		MathLib::Vector command_pose_joint ; command_pose_joint.Resize(7);
 
 
 	//------ command calculate part ------------------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------
@@ -317,16 +318,28 @@ void test_mini_code::ComputeCommand() {
 
 		//---- use IK get joint position 
 			command_pose_task=real_pose_+desired_vel_*dt_;
-			// here code IK which will be a function like: command_pose_cartision=IK(command_pose_task);
+			// here code IK which will be a function like: command_pose_joint=IK(command_pose_task);
 
 
 		//---- calculate pose_command
 			for (size_t i = 0; i < 7; i++)
 			{
-				pose_command_velue[i]=command_pose_cartision(i);
-			}
-			pose_command.insert(pose_command.begin(),pose_command_velue,pose_command_velue+7);
+				// pose_command_velue[i]=command_pose_joint(i);
 
+				//---- TEST position control
+					if (safe_time_count<=1000)
+					{
+						pose_command_velue[i]=pose_command_velue[i]+0.0001*dt_;
+						safe_time_count+=1;
+					}
+
+			}
+
+			pose_command.insert(pose_command.begin(),pose_command_velue,pose_command_velue+7);
+			
+			ROS_WARN_STREAM_THROTTLE(warn_freq, "pose_command_velue  : " << pose_command_velue[0]<<", "<< pose_command_velue[1]<<", "<< pose_command_velue[2]<<", "<< pose_command_velue[3]<<", "<< pose_command_velue[4]<<", "<< pose_command_velue[5]<<", "<< pose_command_velue[6]);
+			// ROS_WARN_STREAM_THROTTLE(warn_freq, "pose_command  : " << pose_command(0)<<", "<< pose_command(1)<<", "<< pose_command(2));
+		
 
 		//---- calculate eig
 			eig_velue[0]=20;
@@ -403,9 +416,9 @@ void test_mini_code::ComputeCommand() {
 
 
 void test_mini_code::PublishCommand() {
-	pub_desired_vel_.publish(msg_desired_vel_);
-	pub_desired_vel_filtered_.publish(msg_desired_vel_filtered_);
-	pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
+	// pub_desired_vel_.publish(msg_desired_vel_);
+	// pub_desired_vel_filtered_.publish(msg_desired_vel_filtered_);
+	// pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
 	eig.clear();
 	pub_desired_position_.publish(msg_desired_pose_);
 	pose_command.clear();
