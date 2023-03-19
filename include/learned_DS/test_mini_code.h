@@ -141,6 +141,7 @@ private:
     float eig_velue[2];
     std::vector<double> pose_command;
     float pose_command_velue[7];
+    float pose_change_velocity;
   
   //---- limitation for output
     double Velocity_limit_;

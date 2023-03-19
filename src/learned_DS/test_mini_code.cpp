@@ -50,7 +50,7 @@ test_mini_code::test_mini_code(
 			record_1_robotdemo_0_humandemo_(record_1_robotdemo_0_humandemo),
 			target_(target),
 		//---- init some parameter, which can use dycall to online change
-			eig_velue{70.0,60.0},pose_command_velue{0.0, 0.667, 0.0017, -1.2, 0.018, -0.4, 0.008},Velocity_limit_(0.1){
+			eig_velue{70.0,60.0},pose_command_velue{0.0, 0.667, 0.0017, -1.2, 0.018, -0.4, 0.008},pose_change_velocity(0.1),Velocity_limit_(0.1){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -322,6 +322,7 @@ void test_mini_code::ComputeCommand() {
 
 
 		//---- calculate pose_command
+
 			for (size_t i = 0; i < 7; i++)
 			{
 				// pose_command_velue[i]=command_pose_joint(i);
@@ -329,8 +330,13 @@ void test_mini_code::ComputeCommand() {
 				//---- TEST position control
 					if (safe_time_count<=1000)
 					{
-						pose_command_velue[i]=pose_command_velue[i]+0.0001*dt_;
+						pose_command_velue[i]=pose_command_velue[i]+pose_change_velocity*dt_;
 						safe_time_count+=1;
+					}
+					else
+					{
+						safe_time_count=1;
+						pose_change_velocity=(-1)*pose_change_velocity;
 					}
 
 			}
@@ -381,7 +387,12 @@ void test_mini_code::ComputeCommand() {
 			msg_desired_damping_eig_.data.insert(msg_desired_damping_eig_.data.end(), eig.begin(), eig.end());
 		
 		//---------- set position
-			msg_desired_pose_.data.insert(msg_desired_pose_.data.end(), pose_command.begin(), pose_command.end());
+			// msg_desired_pose_.data.insert(msg_desired_pose_.data.end(), pose_command.begin(), pose_command.end());
+			// for (size_t i = 0; i < 7; i++)
+			// {
+			// 	msg_desired_pose_.data.push_back(pose_command_velue[2]);
+			// }
+			msg_desired_pose_.data=pose_command;
 
 
 	//----- print new information
@@ -418,7 +429,7 @@ void test_mini_code::ComputeCommand() {
 void test_mini_code::PublishCommand() {
 	// pub_desired_vel_.publish(msg_desired_vel_);
 	// pub_desired_vel_filtered_.publish(msg_desired_vel_filtered_);
-	// pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
+	pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
 	eig.clear();
 	pub_desired_position_.publish(msg_desired_pose_);
 	pose_command.clear();
