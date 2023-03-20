@@ -31,6 +31,7 @@
 #include <std_msgs/Float64MultiArray.h>
 #include "std_msgs/MultiArrayDimension.h"
 #include <std_msgs/Float64.h>
+#include <sensor_msgs/JointState.h>
 
 //---- eigen and vector
 #include "Eigen/Eigen"
@@ -82,6 +83,7 @@ private:
     ros::Subscriber           sub_real_pose_;
     ros::Subscriber           sub_real_vel_;
     ros::Subscriber           sub_real_force_;
+    ros::Subscriber           sub_real_joint_states_;
     
     ros::Publisher            pub_desired_vel_;
     ros::Publisher            pub_desired_vel_filtered_;
@@ -102,6 +104,7 @@ private:
     geometry_msgs::Pose       msg_real_pose_;
     geometry_msgs::Twist       msg_real_vel_;
     geometry_msgs::Twist      msg_real_force_;
+    sensor_msgs::JointState      msg_real_joint_state_;
 
     geometry_msgs::Twist            msg_desired_vel_;
     geometry_msgs::Pose            msg_desired_vel_filtered_;
@@ -177,7 +180,7 @@ private:
 
     Eigen::Vector3f _gravity;
 
-
+    bool first_get_joint_state_received;
 
 public:
 	test_mini_code(
@@ -213,6 +216,9 @@ private:
   void UpdateRealVel(const geometry_msgs::Twist::ConstPtr& msg_vel);
 
 	void UpdateRealForce(const geometry_msgs::WrenchStamped& msg_real_force_);
+
+  void UpdateRealJointStates(const sensor_msgs::JointState& msg_real_joint_state_);
+
 
 	void ComputeCommand();
 

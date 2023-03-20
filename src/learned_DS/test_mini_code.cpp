@@ -50,7 +50,10 @@ test_mini_code::test_mini_code(
 			record_1_robotdemo_0_humandemo_(record_1_robotdemo_0_humandemo),
 			target_(target),
 		//---- init some parameter, which can use dycall to online change
-			eig_velue{70.0,60.0},pose_command_velue{0.0, 0.667, 0.0017, -1.2, 0.018, -0.4, 0.008},pose_change_velocity(0.1),Velocity_limit_(0.1){
+			eig_velue{70.0,60.0},
+			pose_command_velue{0.0, 0.667, 0.0017, -1.2, 0.018, -0.4, 0.008},
+			// pose_command_velue{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+			pose_change_velocity(0.1),Velocity_limit_(0.1){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -94,6 +97,8 @@ bool test_mini_code::Init() {
 
 	//------ some condition for phase change and coupled
 		_firstRealPoseReceived = false;
+
+		first_get_joint_state_received = false;
 
 		//----- walid compensation
 			if (record_1_robotdemo_0_humandemo_)
@@ -178,6 +183,7 @@ bool test_mini_code::InitializeROS() {
   sub_real_pose_              = nh_.subscribe( input_pose_name_ , 1000, &test_mini_code::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
   sub_real_vel_              = nh_.subscribe( input_vel_name_ , 1000, &test_mini_code::UpdateRealVel, this, ros::TransportHints().reliable().tcpNoDelay());
   sub_real_force_             = nh_.subscribe( input_force_name_ , 1000, &test_mini_code::UpdateRealForce, this, ros::TransportHints().reliable().tcpNoDelay());
+  sub_real_joint_states_              = nh_.subscribe( "/iiwa/joint_states" , 1000, &test_mini_code::UpdateRealJointStates, this, ros::TransportHints().reliable().tcpNoDelay());
   
   pub_desired_vel_          	= nh_.advertise<geometry_msgs::Twist>(output_vel_name_, 1);    
 	pub_desired_vel_filtered_ 	= nh_.advertise<geometry_msgs::Pose>(output_filtered_vel_name_, 1);
@@ -198,8 +204,6 @@ bool test_mini_code::InitializeROS() {
 }
 
 bool test_mini_code::InitDSAndFilter(){
-
-	
 
 	//--- trans target in ymal into target_pose_
 		target_pose_.Resize(3);
@@ -288,6 +292,20 @@ void test_mini_code::UpdateRealForce(const geometry_msgs::WrenchStamped& msg_rea
 	end_torque_(2)=msg_real_force_.wrench.torque.z;
 
 	end_force_=end_force_-end_force_zero_stable_;
+}
+
+void test_mini_code::UpdateRealJointStates(const sensor_msgs::JointState& msg_real_joint_state_) {
+
+	if (!first_get_joint_state_received)
+	{
+		for (size_t i = 0; i < 7; i++)
+		{
+			pose_command_velue[i]=msg_real_joint_state_.position[i];
+		}
+
+		first_get_joint_state_received = true;
+	}
+	
 }
 
 void test_mini_code::ComputeCommand() {
