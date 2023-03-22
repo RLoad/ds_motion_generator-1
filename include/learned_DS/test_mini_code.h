@@ -94,11 +94,12 @@ private:
     std::string               input_pose_name_;
     std::string               input_vel_name_;
     std::string               input_force_name_;
+    std::string               input_joint_state_name_;
 
     std::string               output_vel_name_;
     std::string               output_filtered_vel_name_;
     std::string               output_damping_eig_topic_name_;
-    
+    std::string               output_joint_position_name_;
     
     //----- Messages
     geometry_msgs::Pose       msg_real_pose_;
@@ -191,9 +192,11 @@ public:
               std::string input_pose_name,
               std::string input_vel_name,
               std::string input_force_name,
+              std::string input_joint_state_name,
               std::string output_vel_name,
               std::string output_filtered_vel_name,
               std::string output_damping_eig_topic_name,
+              std::string output_joint_position_name,
               bool brecord_or_not,
               bool record_1_robotdemo_0_humandemo,
             //--- parem in yaml

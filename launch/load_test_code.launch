@@ -10,10 +10,12 @@
     <param name="input_vel_name"                   value="/iiwa/ee_info/Vel"/>
     <!-- <param name="input_force_name"                  value="/ft_sensor/netft_data"/> -->
     <param name="input_force_name"                  value="/iiwa/iiwa_FTS_topic"/>
+    <param name="input_joint_state_name"                  value="/iiwa/joint_states"/>
     
     <param name="output_vel_name"                 value="/ds1/desired_velocity"/>
     <param name="output_filtered_vel_name"        value="/passive_control/vel_quat"/>
     <param name="output_damping_eig_topic_name"        value="/lwr/joint_controllers/passive_ds_eig"/>
+    <param name="output_joint_position_name_"        value="/iiwa/PositionController/command"/>
 
     #---- control parameter
     <param name="record_or_not"                     value="true"/>

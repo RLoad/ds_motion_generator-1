@@ -27,9 +27,11 @@ test_mini_code::test_mini_code(
               std::string input_pose_name,
               std::string input_vel_name,
               std::string input_force_name,
+			  std::string input_joint_state_name,
               std::string output_vel_name,
               std::string output_filtered_vel_name,
               std::string output_damping_eig_topic_name,
+			  std::string output_joint_position_name,
               bool brecord_or_not,
               bool record_1_robotdemo_0_humandemo,
             //--- parem in yaml
@@ -41,9 +43,11 @@ test_mini_code::test_mini_code(
 			input_pose_name_(input_pose_name),
 			input_vel_name_(input_vel_name),
 			input_force_name_(input_force_name),
+			input_joint_state_name_(input_joint_state_name),
 			output_vel_name_(output_vel_name),
 			output_filtered_vel_name_(output_filtered_vel_name),
 			output_damping_eig_topic_name_(output_damping_eig_topic_name),
+			output_joint_position_name_(output_joint_position_name),
 			dt_(1 / frequency),
 			safe_time_count(1),
 			brecord_or_not_(brecord_or_not),
@@ -183,14 +187,14 @@ bool test_mini_code::InitializeROS() {
   sub_real_pose_              = nh_.subscribe( input_pose_name_ , 1000, &test_mini_code::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
   sub_real_vel_              = nh_.subscribe( input_vel_name_ , 1000, &test_mini_code::UpdateRealVel, this, ros::TransportHints().reliable().tcpNoDelay());
   sub_real_force_             = nh_.subscribe( input_force_name_ , 1000, &test_mini_code::UpdateRealForce, this, ros::TransportHints().reliable().tcpNoDelay());
-  sub_real_joint_states_              = nh_.subscribe( "/iiwa/joint_states" , 1000, &test_mini_code::UpdateRealJointStates, this, ros::TransportHints().reliable().tcpNoDelay());
+  sub_real_joint_states_              = nh_.subscribe( input_joint_state_name_ , 1000, &test_mini_code::UpdateRealJointStates, this, ros::TransportHints().reliable().tcpNoDelay());
   
   pub_desired_vel_          	= nh_.advertise<geometry_msgs::Twist>(output_vel_name_, 1);    
 	pub_desired_vel_filtered_ 	= nh_.advertise<geometry_msgs::Pose>(output_filtered_vel_name_, 1);
 	pub_desired_damping_eig_         = nh_.advertise<std_msgs::Float64MultiArray>(output_damping_eig_topic_name_, 1);
 
 	//--- position control
-	pub_desired_position_          	= nh_.advertise<std_msgs::Float64MultiArray>("/iiwa/PositionController/command", 1);    
+	pub_desired_position_          	= nh_.advertise<std_msgs::Float64MultiArray>(output_joint_position_name_, 1);    
 	
 	if (nh_.ok()) { // Wait for poses being published
 		ros::spinOnce();
@@ -445,12 +449,14 @@ void test_mini_code::ComputeCommand() {
 
 
 void test_mini_code::PublishCommand() {
-	// pub_desired_vel_.publish(msg_desired_vel_);
-	// pub_desired_vel_filtered_.publish(msg_desired_vel_filtered_);
-	pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
-	eig.clear();
-	pub_desired_position_.publish(msg_desired_pose_);
-	pose_command.clear();
+	//---- for damping control
+		// pub_desired_vel_.publish(msg_desired_vel_);
+		// pub_desired_vel_filtered_.publish(msg_desired_vel_filtered_);
+		// pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
+		// eig.clear();
+	//--- for position control
+		pub_desired_position_.publish(msg_desired_pose_);
+		pose_command.clear();
 }
 
 

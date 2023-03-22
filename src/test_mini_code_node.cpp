@@ -35,9 +35,11 @@ int main(int argc, char **argv)
     std::string input_pose_name;
     std::string input_vel_name;
     std::string input_force_name;
+    std::string input_joint_state_name;
     std::string output_vel_name;
     std::string output_filtered_vel_name;
     std::string output_damping_eig_topic_name;
+    std::string output_joint_position_name;
     bool brecord_or_not(false);
     bool record_1_robotdemo_0_humandemo(false);
 
@@ -61,6 +63,11 @@ int main(int argc, char **argv)
       // return -1;
     }
 
+    if (!nh.getParam("input_joint_state_name", input_joint_state_name))   {
+      ROS_ERROR("Couldn't retrieve the topic name for the input force. ");
+      // return -1;
+    }
+
     if (!nh.getParam("output_vel_name", output_vel_name))   {
       ROS_ERROR("Couldn't retrieve the vel name for the orign output. ");
       // return -1;
@@ -72,6 +79,11 @@ int main(int argc, char **argv)
     }
 
     if (!nh.getParam("output_damping_eig_topic_name", output_damping_eig_topic_name))   {
+      ROS_ERROR("Couldn't retrieve the damping eig name for the output. ");
+      // return -1;
+    }
+
+    if (!nh.getParam("output_joint_position_name", output_joint_position_name))   {
       ROS_ERROR("Couldn't retrieve the damping eig name for the output. ");
       // return -1;
     }
@@ -100,9 +112,11 @@ int main(int argc, char **argv)
                         input_pose_name,
                         input_vel_name,
                         input_force_name,
+                        input_joint_state_name,
                         output_vel_name,
                         output_filtered_vel_name,
                         output_damping_eig_topic_name,
+                        output_joint_position_name,
                         brecord_or_not,
                         record_1_robotdemo_0_humandemo,
                       //--- param in yaml
