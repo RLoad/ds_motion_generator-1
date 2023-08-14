@@ -450,13 +450,13 @@ void test_mini_code::ComputeCommand() {
 
 void test_mini_code::PublishCommand() {
 	//---- for damping control
-		// pub_desired_vel_.publish(msg_desired_vel_);
-		// pub_desired_vel_filtered_.publish(msg_desired_vel_filtered_);
-		// pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
-		// eig.clear();
+		pub_desired_vel_.publish(msg_desired_vel_);
+		pub_desired_vel_filtered_.publish(msg_desired_vel_filtered_);
+		pub_desired_damping_eig_.publish(msg_desired_damping_eig_);
+		eig.clear();
 	//--- for position control
-		pub_desired_position_.publish(msg_desired_pose_);
-		pose_command.clear();
+		// pub_desired_position_.publish(msg_desired_pose_);
+		// pose_command.clear();
 }
 
 
