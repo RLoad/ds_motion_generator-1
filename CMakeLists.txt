@@ -18,6 +18,10 @@ find_package(catkin REQUIRED COMPONENTS
   gaussian_process_regression
 )
 find_package(Eigen3 REQUIRED)
+include_directories(
+    ${catkin_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIRS}
+)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
