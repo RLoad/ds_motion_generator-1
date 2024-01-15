@@ -370,8 +370,8 @@ void test_mini_code::ComputeCommand() {
 		
 
 		//---- calculate eig
-			eig_velue[0]=20;
-			eig_velue[1]=20;
+			eig_velue[0]=80;
+			eig_velue[1]=80;
 			eig.insert(eig.begin(),eig_velue,eig_velue+2);
 
 	//------ command calculate part end ------------------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------
